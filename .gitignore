@@ -1,4 +1,8 @@
 /*
 !kubernetes/
 !HelmxMariadb/
+HelmxMariadb/ 
+Stockages_secrets/ 
+datascientest-wordpress/
 !.gitignore
+
