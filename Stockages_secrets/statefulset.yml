@@ -1,0 +1,53 @@
+#    En-tête (métadonnées Kubernetes)
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb
+
+#   spec du StatefulSet
+spec:
+  selector:
+    matchLabels:
+      app: mariadb
+  serviceName: mariadb
+  replicas: 1
+
+#   template (le gabarit de Pod)
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      containers:
+        - name: mariadb
+          image: docker.io/mariadb:10.4
+
+          # Configuration réseau et stockage du container
+          ports:
+            - containerPort: 3306
+              protocol: TCP
+          # ajoutons nos Secret
+          env:
+            - name: MARIADB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-root-password
+                  key: password
+          envFrom:
+            - secretRef:
+                name: mariadb-user
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: config
+              mountPath: etc/mysql/conf.d
+
+      volumes:
+        - emptyDir: {}
+          name: data
+        - name: config
+          configMap:
+            name: cm-mariadb
+            items:
+              - key: mysqld.cnf
+                path: mysqld.cnf

@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  mysqld.cnf: |-
+    [mysqld]
+    max_allowed_packet = 128M
+kind: ConfigMap
+metadata:
+  name: cm-mariadb

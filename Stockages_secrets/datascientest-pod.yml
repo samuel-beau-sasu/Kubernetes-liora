@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-datascientest
+  labels:
+    app: nginx
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      imagePullPolicy: IfNotPresent # Télécharge l'image uniquement si elle n'est pas présente
+      volumeMounts:
+        - name: datascientest-volume
+          mountPath: /usr/share/nginx/html/ # Répertoire dans le conteneur qui sera monté sur le volume
+      ports:
+        - containerPort: 80
+  volumes:
+    - name: datascientest-volume # Nom du volume persistant
+      persistentVolumeClaim:
+        claimName: pvc-datascientest # Nom du PVC à utiliser

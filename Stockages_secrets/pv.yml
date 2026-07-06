@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: datascientest-pv
+#--------------------------------------------
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"
+    type: DirectoryOrCreate # crée le dossier /mnt/data si il n'existe pas 
+  storageClassName: local-path
