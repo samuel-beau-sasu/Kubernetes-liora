@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb
+spec:
+  selector:
+    matchLabels:
+      app: mariadb
+  serviceName: mariadb
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      containers:
+        - name: mariadb
+          image: docker.io/mariadb:10.4
+          ports:
+            - containerPort: 3306
+              protocol: TCP
+          env:
+            - name: MARIADB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-root-password
+                  key: password
+          envFrom:
+            - secretRef:
+                name: mariadb-user
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: config
+              mountPath: /etc/mysql/conf.d # Correction du chemin
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+      volumes:
+        - name: config
+          configMap:
+            name: cm-mariadb
+            items:
+              - key: mysqld.cnf
+                path: mysqld.cnf
+  volumeClaimTemplates: # Vraie persistance des données
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: "standard" # À adapter selon ton cluster (local-path, gp2, etc.)
+        resources:
+          requests:
+            storage: 5Gi

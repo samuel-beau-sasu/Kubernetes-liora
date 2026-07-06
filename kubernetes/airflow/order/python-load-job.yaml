@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: python-load
+spec:
+  template:
+    spec:
+      containers:
+      - name: python-load
+        image: samuelbeau/order-python-load
+        command: ["python", "main.py"]
+        envFrom:
+        - secretRef:
+            name: sql-conn
+        volumeMounts:
+        - name: order-data-folder
+          mountPath: /app/data/to_ingest
+      restartPolicy: Never
+      volumes:
+      - name: order-data-folder
+        hostPath:
+          path: /home/ubuntu/kubernetes/airflow/order/data/to_ingest

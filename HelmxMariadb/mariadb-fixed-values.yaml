@@ -1,0 +1,18 @@
+auth:
+  existingSecret: mariadb-root-password
+  rootPasswordKey: password
+  customPasswordFilesSecret: mariadb-user
+
+primary:
+  # max_allowed_packet: 128MB
+  extraFlags: "--max-allowed-packet=134217728"
+  persistence:
+    enabled: true
+    size: 8Gi
+  livenessProbe:
+    enabled: true
+  readinessProbe:
+    enabled: true
+
+metrics:
+  enabled: false

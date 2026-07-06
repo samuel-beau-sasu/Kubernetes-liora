@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: python-load
+spec:
+  template:
+    spec:
+      containers:
+      - name: python-load
+        image: samuelbeau/order-python-load
+        command: ["python", "main.1.py"]
+        env:
+        - name: HOST
+          value: "airflow-postgresql"
+        - name: USER
+          valueFrom:
+            secretKeyRef:
+              name: sql-conn   # Le nom du secret Kubernetes créé dans le cours
+              key: USER        # La clé stockée dans ce secret
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sql-conn
+              key: PASSWORD
+        - name: DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: sql-conn
+              key: DATABASE
+        volumeMounts:
+        - name: order-data-folder
+          mountPath: /app/data/to_ingest
+      restartPolicy: Never
+      volumes:
+      - name: order-data-folder
+        hostPath:
+          path: /home/ubuntu/kubernetes/airflow/order/data/to_ingest

@@ -1,0 +1,23 @@
+dags:
+  persistence:
+    enabled: true
+    existingClaim: airflow-local-dags-folder
+
+logs:
+  persistence:
+    enabled: true
+    existingClaim: airflow-local-logs-folder
+
+uid: 1000
+gid: 1000
+
+dagProcessor:
+  env:
+  - name: AIRFLOW__DAG_PROCESSOR__REFRESH_INTERVAL
+    value: "10"
+
+executor: CeleryExecutor
+
+# Ajout des dépendances Python pour l'ensemble du cluster Airflow
+pipPackages:
+  - "apache-airflow-providers-postgres"

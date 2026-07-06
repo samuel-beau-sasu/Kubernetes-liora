@@ -1,0 +1,17 @@
+USER-SUPPLIED VALUES:
+auth:
+  customPasswordFilesSecret: mariadb-user
+  existingSecret: mariadb-root-password
+  rootPasswordKey: password
+primary:
+  configuration: |
+    [mysqld]
+    max_allowed_packet = 128M
+    skip-networking = 0        # ouvre le port 3306
+    bind-address = 0.0.0.0     # écoute sur toutes les interfaces
+  livenessProbe:
+    enabled: false
+  persistence:
+    enabled: false
+  readinessProbe:
+    enabled: false

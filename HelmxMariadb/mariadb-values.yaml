@@ -1,0 +1,21 @@
+auth:
+  existingSecret: mariadb-root-password
+  rootPasswordKey: mariadb-root-password
+  customPasswordFilesSecret: mariadb-user
+       
+primary:
+  configuration: |
+    [mysqld]
+    max_allowed_packet = 128M
+    skip-networking = 0
+    bind-address = 0.0.0.0
+  persistence:
+    enabled: true
+    size: 8Gi
+  livenessProbe:
+    enabled: true
+  readinessProbe:
+    enabled: true
+
+metrics:
+  enabled: false

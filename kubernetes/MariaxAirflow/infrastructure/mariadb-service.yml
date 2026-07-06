@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+spec:
+  clusterIP: None # Headless Service pour stabilité DNS
+  selector:
+    app: mariadb
+  ports:
+    - port: 3306
+      targetPort: 3306
+      name: mysql
