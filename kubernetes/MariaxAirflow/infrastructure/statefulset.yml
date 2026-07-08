@@ -47,12 +47,15 @@ spec:
             items:
               - key: mysqld.cnf
                 path: mysqld.cnf
-  volumeClaimTemplates: # Vraie persistance des données
-    - metadata:
-        name: data
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        storageClassName: "standard" # À adapter selon ton cluster (local-path, gp2, etc.)
-        resources:
-          requests:
-            storage: 5Gi
+        - name: data           # <--- AJOUTER CECI
+          persistentVolumeClaim: 
+            claimName: mariadb-pvc # <--- On pointe vers VOTRE PVC existant
+#  volumeClaimTemplates: # Vraie persistance des données
+#    - metadata:
+#        name: data
+#      spec:
+#        accessModes: [ "ReadWriteOnce" ]
+#        storageClassName: "standard" # À adapter selon ton cluster (local-path, gp2, etc.)
+#        resources:
+#          requests:
+#            storage: 5Gi

@@ -144,3 +144,127 @@ kubectl apply -f mariadb-pvc.yml -n airflow
 
 test
 git push origin master --force
+
+# Déploiement
+
+Voici la procédure complète et les commandes exactes pour lancer le projet. J'ai structuré cela par étapes logiques pour garantir que chaque couche soit opérationnelle avant de passer à la suivante.
+
+📋 Guide de déploiement : Projet MariaxAirflow
+
+Étape 1 : Déploiement de l'infrastructure de stockage et sécurité
+On commence par les secrets et les volumes, car sans eux, la base de données ne peut pas démarrer.
+
+bash
+Aller dans le dossier infrastructure
+cd ~/kubernetes/MariaxAirflow/infrastructure
+
+Appliquer les secrets (mots de passe)
+kubectl apply -f secret-root-password.yml
+kubectl apply -f secret-mariadb-user.yml
+
+Appliquer les volumes MariaDB (PV et PVC)
+kubectl apply -f mariadb-pv.yml
+kubectl apply -f mariadb-pvc.yml
+
+Appliquer les volumes Airflow (DAGs et Logs)
+kubectl apply -f airflow-local-dags-folder-pv.yaml
+kubectl apply -f airflow-local-dags-folder-pvc.yaml
+kubectl apply -f airflow-local-logs-folder-pv.yaml
+kubectl apply -f airflow-local-logs-folder-pvc.yaml
+
+
+Option 1 : La méthode propre (Supprimer les Pods d'abord)
+Il faut supprimer tout ce qui pourrait utiliser ces volumes.
+Supprimer TOUS les PVC du namespace actuel
+kubectl delete pvc --all
+
+Supprimer TOUS les PV (Attention : action radicale)
+kubectl delete pv --all
+
+Supprimer tous les pods dans tous les namespaces (ou ciblez vos namespaces spécifiques)
+kubectl delete pods --all-namespaces
+
+
+Option 2 : La méthode "Force Brute" (Supprimer les Finalizers)
+Si vous voulez forcer la suppression immédiate sans chercher quel Pod bloque, vous devez supprimer le "verrou" (finalizer) de chaque ressource. C'est la méthode la plus rapide quand on est en phase de test.
+
+Pour les PVC :
+bash
+kubectl get pvc -A -o name | xargs -I {} kubectl patch {} -p '{"metadata":{"finalizers":null}}' --type=merge
+
+
+Pour les PV :
+bash
+kubectl get pv -o name | xargs -I {} kubectl patch {} -p '{"metadata":{"finalizers":null}}' --type=merge
+
+
+Étape 2 : Déploiement de la base de données MariaDB
+On lance le serveur de base de données.
+
+bash
+Appliquer la configuration et le service réseau
+kubectl create configmap cm-mariadb --from-file=mysqld.cnf
+kubectl apply -f mariadb-service.yml
+
+Lancer le StatefulSet MariaDB
+kubectl apply -f statefulset.yml
+
+VERIFICATION : Attendre que le pod soit "Running"
+kubectl get pods -w
+
+Note : Si le pod MariaDB redémarre en boucle, vérifiez les logs avec kubectl logs <nom-du-pod>.
+
+Étape 3 : Déploiement d'Airflow
+Une fois que la base est stable, on déploie l'orchestrateur.
+
+bash
+Utiliser Helm pour déployer Airflow avec vos valeurs personnalisées
+Assurez-vous d'être dans le dossier airflow
+cd ~/kubernetes/MariaxAirflow/airflow
+
+helm install airflow apache-airflow/airflow -f my_values.yaml -n airflow --create-namespace
+
+
+Étape 4 : Vérification finale et Accès
+Une fois tout déployé, vérifiez que tout communique.
+
+bash
+Vérifier l'état de tous les services
+kubectl get all -n airflow
+
+Pour accéder à l'interface web d'Airflow (si pas de LoadBalancer)
+kubectl port-forward svc/airflow-webserver 8082:8080 -n airflow
+
+L'interface sera alors accessible sur http://localhost:8080.
+34.247.167.93:8080
+
+Le Port-Forward (La plus rapide pour le test)
+Vous créez un tunnel direct entre votre machine et le pod.
+    
+Lancez cette commande dans un terminal séparé :
+
+kubectl port-forward svc/airflow-api-server 8080:8080 -n airflow
+
+
+💡 Rappel important pour le build des images (App)
+Si vous devez builder les images pour les pods de chargement/transformation, n'oubliez pas de vous placer dans les dossiers spécifiques :
+
+Pour le chargement (Load) :
+bash
+cd ~/kubernetes/MariaxAirflow/app/order/docker/prod/python_load
+docker build -t my-python-load:latest .
+
+
+Pour la transformation (Transform) :
+bash
+cd ~/kubernetes/MariaxAirflow/app/order/docker/prod/python_transform
+docker build -t my-python-transform:latest .
+
+# Création de l'utilisateur admin
+kubectl exec deployment/airflow-api-server -n airflow -- airflow users create \
+  --username admin \
+  --password admin \
+  --firstname admin \
+  --lastname user \
+  --role Admin \
+  --email admin@example.com

@@ -12,4 +12,4 @@ spec:
      namespace: airflow
      name: airflow-local-logs-folder
   hostPath:
-    path: "/home/ubuntu/kubernetes/airflow/logs"
+    path: "/home/ubuntu/kubernetes/MariaxAirflow/airflow/logs"

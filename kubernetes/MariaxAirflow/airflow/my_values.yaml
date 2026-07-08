@@ -21,3 +21,12 @@ executor: CeleryExecutor
 # Ajout des dépendances Python pour l'ensemble du cluster Airflow
 pipPackages:
   - "apache-airflow-providers-postgres"
+
+apiServer:
+  startupProbe:
+    failureThreshold: 30
+    periodSeconds: 10
+  livenessProbe:
+    initialDelaySeconds: 60
+  readinessProbe:
+    initialDelaySeconds: 60
