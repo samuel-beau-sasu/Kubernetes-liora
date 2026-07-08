@@ -1,5 +1,0 @@
-Nothing to save from this segment. The user profile already captures: French language, detailed procedure preference, caution-over-speed, Datascientest Kubernetes training (S3 dst-de, namespaces test-airflow/eval), topics Airflow-on-k8s, StatefulSet MySQL, FastAPI Deployments. This segment only adds transient exercise state (ConfigMap cm-mariadb created in default namespace, working dir /home/ubuntu/Stockages_secrets/) which will be stale and re-discoverable.
-§
-User is conducting Kubernetes training (Datascientest), focusing on MariaDB and Airflow deployments. Found that for Bitnami MariaDB charts, using 'primary.configuration' can cause networking issues (Error 2002), and 'primary.extraFlags' is more robust. User prefers a detailed, layered understanding of root causes (e.g., why a configuration fails vs. how to fix it) and prefers procedural playbooks written to local files.
-§
-Airflow on K8s: 'defaultUser' in values.yaml only applies on first installation. If PVC persists, the DB is seen as initialized and the user is not created automatically. Solution: manually create the user via 'airflow users create' command using kubectl exec.
